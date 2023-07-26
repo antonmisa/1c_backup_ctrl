@@ -26,23 +26,24 @@ const (
 )
 
 var (
-	ErrNotFound        = errors.New("key not found")
-	ErrInfobaseIsEmpty = errors.New("infobase is empty")
-	ErrSessionIsEmpty  = errors.New("session is empty")
+	ErrNotFound          = errors.New("key not found")
+	ErrInfobaseIsEmpty   = errors.New("infobase is empty")
+	ErrSessionIsEmpty    = errors.New("session is empty")
+	ErrConnectionIsEmpty = errors.New("connection is empty")
 )
 
 // CtrlPipe -.
 type CtrlPipe struct {
 	h Helper
 
-	pipe              pipe.Interface
+	pipe              pipe.Piper
 	clusterConnection string
 }
 
 var _ uc.CtrlPipe = (*CtrlPipe)(nil)
 
 // New -.
-func New(p pipe.Interface, cc string) *CtrlPipe {
+func New(p pipe.Piper, cc string) *CtrlPipe {
 	ctrl := &CtrlPipe{
 		h:                 Helper{},
 		pipe:              p,
@@ -73,6 +74,11 @@ func (r *CtrlPipe) GetClusters(ctx context.Context) ([]entity.Cluster, error) {
 	defer close(quit)
 	defer close(errs)
 	defer close(datas)
+
+	if err = cmd.Start(); err != nil {
+		//break all
+		return nil, fmt.Errorf("ctrlpipe - getclusters - cmd.Start: %w", err)
+	}
 
 	wg.Add(1)
 	go func() {
@@ -122,17 +128,12 @@ func (r *CtrlPipe) GetClusters(ctx context.Context) ([]entity.Cluster, error) {
 		}
 	}()
 
-	if err = cmd.Start(); err != nil {
-		//break all
-		return nil, fmt.Errorf("ctrlpipe - getclusters - cmd.Start: %w", err)
-	}
-
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 
 		if err = cmd.Wait(); err != nil {
-			errs <- err
+			errs <- fmt.Errorf("ctrlpipe - getclusters - cmd.Wait: %w", err)
 		}
 		quit <- struct{}{}
 	}()
@@ -543,7 +544,7 @@ func (r *CtrlPipe) EnableSessions(ctx context.Context, cluster entity.Cluster, i
 
 func (r *CtrlPipe) DeleteSession(ctx context.Context, cluster entity.Cluster, session entity.Session, clusterCred entity.Credentials) error {
 	if session == (entity.Session{}) {
-		return fmt.Errorf("ctrlpipe - deletesession: %w", ErrInfobaseIsEmpty)
+		return fmt.Errorf("ctrlpipe - deletesession: %w", ErrSessionIsEmpty)
 	}
 
 	args := []string{r.clusterConnection, "session", "terminate",
@@ -738,7 +739,7 @@ func (r *CtrlPipe) GetConnections(ctx context.Context, cluster entity.Cluster, i
 
 func (r *CtrlPipe) DeleteConnection(ctx context.Context, cluster entity.Cluster, connection entity.Connection, clusterCred entity.Credentials) error {
 	if connection == (entity.Connection{}) {
-		return fmt.Errorf("ctrlpipe - deleteconnection: %w", ErrInfobaseIsEmpty)
+		return fmt.Errorf("ctrlpipe - deleteconnection: %w", ErrConnectionIsEmpty)
 	}
 
 	args := []string{r.clusterConnection, "connection", "disconnect",

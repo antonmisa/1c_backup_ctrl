@@ -145,17 +145,27 @@ func (_m *Ctrl) InfobaseByName(ctx context.Context, cluster entity.Cluster, info
 }
 
 // RunBackup provides a mock function with given fields: ctx, cluster, infobase, infobaseCred, lockCode, outputPath
-func (_m *Ctrl) RunBackup(ctx context.Context, cluster entity.Cluster, infobase entity.Infobase, infobaseCred entity.Credentials, lockCode string, outputPath string) error {
+func (_m *Ctrl) RunBackup(ctx context.Context, cluster entity.Cluster, infobase entity.Infobase, infobaseCred entity.Credentials, lockCode string, outputPath string) (string, error) {
 	ret := _m.Called(ctx, cluster, infobase, infobaseCred, lockCode, outputPath)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, entity.Cluster, entity.Infobase, entity.Credentials, string, string) error); ok {
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, entity.Cluster, entity.Infobase, entity.Credentials, string, string) (string, error)); ok {
+		return rf(ctx, cluster, infobase, infobaseCred, lockCode, outputPath)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, entity.Cluster, entity.Infobase, entity.Credentials, string, string) string); ok {
 		r0 = rf(ctx, cluster, infobase, infobaseCred, lockCode, outputPath)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(string)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, entity.Cluster, entity.Infobase, entity.Credentials, string, string) error); ok {
+		r1 = rf(ctx, cluster, infobase, infobaseCred, lockCode, outputPath)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // Sessions provides a mock function with given fields: ctx, cluster, infobase, clusterCred

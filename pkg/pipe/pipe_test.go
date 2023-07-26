@@ -22,14 +22,15 @@ func TestPipe_New(t *testing.T) {
 		},
 		{
 			name: "Ok",
-			path: "C:\\Program Files\\1cv8\\8.3.14.1857\\bin\\rac.exe",
+			path: "c:/windows/system32/ping.exe",
 			want: func() *Pipe {
-				p, _ := New("C:\\Program Files\\1cv8\\8.3.14.1857\\bin\\rac.exe")
+				p, _ := New("c:/windows/system32/ping.exe")
 				return p
 			}(),
 			wantErr: nil,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := New(tt.path)
@@ -58,7 +59,7 @@ func TestPipe_Run(t *testing.T) {
 		{
 			name: "Ping",
 			p: func() *Pipe {
-				p, _ := New("C:\\Windows\\System32\\ping.exe")
+				p, _ := New("c:/windows/system32/ping.exe")
 				return p
 			}(),
 			args: args{
@@ -70,7 +71,7 @@ func TestPipe_Run(t *testing.T) {
 		{
 			name: "Ping",
 			p: func() *Pipe {
-				p, _ := New("C:\\Windows\\System32\\ping.exe")
+				p, _ := New("c:/windows/system32/ping.exe")
 				return p
 			}(),
 			args: args{

@@ -11,20 +11,20 @@ import (
 )
 
 var (
-	ErrNoFile = errors.New("RAC file does not exist")
+	ErrNoFile = errors.New("file does not exist")
 )
 
 //go:generate go run github.com/vektra/mockery/v2@v2.32.0 --all
 
-type Interface interface {
-	Run(ctx context.Context, arg ...string) (*exec.Cmd, io.ReadCloser, error)
+type Piper interface {
+	Run(ctx context.Context, arg ...string) (Commander, io.ReadCloser, error)
 }
 
 type Pipe struct {
 	pathToRAC string
 }
 
-var _ Interface = (*Pipe)(nil)
+var _ Piper = (*Pipe)(nil)
 
 func New(path string) (*Pipe, error) {
 	_, err := os.Stat(path)
@@ -37,7 +37,7 @@ func New(path string) (*Pipe, error) {
 	}, nil
 }
 
-func (p Pipe) Run(ctx context.Context, arg ...string) (*exec.Cmd, io.ReadCloser, error) {
+func (p Pipe) Run(ctx context.Context, arg ...string) (Commander, io.ReadCloser, error) {
 	cmd := exec.CommandContext(ctx, p.pathToRAC, arg...) //nolint:gosec // it is normal
 
 	stdout, err := cmd.StdoutPipe()
@@ -45,5 +45,5 @@ func (p Pipe) Run(ctx context.Context, arg ...string) (*exec.Cmd, io.ReadCloser,
 		return nil, nil, err
 	}
 
-	return cmd, stdout, nil
+	return &Command{cmd}, stdout, nil
 }
