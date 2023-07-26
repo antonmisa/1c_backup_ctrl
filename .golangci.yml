@@ -125,3 +125,5 @@ linters:
 run:
   skip-dirs:
     - docs
+  skip-files:
+    - _test.go  

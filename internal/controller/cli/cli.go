@@ -64,8 +64,8 @@ func (cc *Ctrl1CCLI) Backup(clusterName string, infobase string,
 
 	defer func() {
 		// UnBlock all sessions in infobase, always
-		c, cancel := context.WithTimeout(context.TODO(), _defaultOperationTimeout*time.Second)
-		defer cancel()
+		c, cncl := context.WithTimeout(context.TODO(), _defaultOperationTimeout*time.Second)
+		defer cncl()
 
 		err = cc.c.EnableSessions(c, cl, ib, clusterCred, infobaseCred, lockCode)
 		if err != nil {

@@ -13,6 +13,7 @@ func (h Helper) GetKeyValue(line string, delimeter rune) (k, v string, err error
 		if unicode.IsPrint(r) {
 			return unicode.ToLower(r)
 		}
+
 		return -1
 	}, line)
 

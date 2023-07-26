@@ -16,6 +16,8 @@ import (
 const (
 	initialSize int = 10
 
+	defaultBlockTime time.Duration = 60
+
 	formatDate string = "01-02-2006 15:04:05"
 
 	keyInfobase   string = "infobase"
@@ -81,6 +83,7 @@ func (r *CtrlPipe) GetClusters(ctx context.Context) ([]entity.Cluster, error) {
 	}
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -129,6 +132,7 @@ func (r *CtrlPipe) GetClusters(ctx context.Context) ([]entity.Cluster, error) {
 	}()
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -138,7 +142,7 @@ func (r *CtrlPipe) GetClusters(ctx context.Context) ([]entity.Cluster, error) {
 		quit <- struct{}{}
 	}()
 
-	err = nil
+	var errg error
 
 	rv := make([]entity.Cluster, 0, initialSize)
 
@@ -149,16 +153,16 @@ func (r *CtrlPipe) GetClusters(ctx context.Context) ([]entity.Cluster, error) {
 		case data := <-datas:
 			rv = append(rv, data)
 			num++
-		case err = <-errs:
+		case errg = <-errs:
 			cmd.Cancel()
 		case <-quit:
 			wg.Wait()
 
-			if err != nil {
-				return nil, err
+			if errg != nil {
+				return nil, errg
 			}
 
-			return rv[:num:num], err
+			return rv[:num:num], errg
 		}
 	}
 }
@@ -195,6 +199,7 @@ func (r *CtrlPipe) GetInfobases(ctx context.Context, cluster entity.Cluster, clu
 	}
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -205,6 +210,7 @@ func (r *CtrlPipe) GetInfobases(ctx context.Context, cluster entity.Cluster, clu
 	}()
 
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
 
@@ -250,7 +256,7 @@ func (r *CtrlPipe) GetInfobases(ctx context.Context, cluster entity.Cluster, clu
 		}
 	}()
 
-	err = nil
+	var errg error
 
 	rv := make([]entity.Infobase, 0, initialSize)
 
@@ -261,16 +267,16 @@ func (r *CtrlPipe) GetInfobases(ctx context.Context, cluster entity.Cluster, clu
 		case data := <-datas:
 			rv = append(rv, data)
 			num++
-		case err = <-errs:
+		case errg = <-errs:
 			cmd.Cancel()
 		case <-quit:
 			wg.Wait()
 
-			if err != nil {
-				return nil, err
+			if errg != nil {
+				return nil, errg
 			}
 
-			return rv[:num:num], err
+			return rv[:num:num], errg
 		}
 	}
 }
@@ -374,7 +380,7 @@ func (r *CtrlPipe) GetSessions(ctx context.Context, cluster entity.Cluster, info
 		}
 	}()
 
-	err = nil
+	var errg error
 
 	rv := make([]entity.Session, 0, initialSize)
 
@@ -385,16 +391,16 @@ func (r *CtrlPipe) GetSessions(ctx context.Context, cluster entity.Cluster, info
 		case data := <-datas:
 			rv = append(rv, data)
 			num++
-		case err = <-errs:
+		case errg = <-errs:
 			cmd.Cancel()
 		case <-quit:
 			wg.Wait()
 
-			if err != nil {
-				return nil, err
+			if errg != nil {
+				return nil, errg
 			}
 
-			return rv[:num:num], err
+			return rv[:num:num], errg
 		}
 	}
 }
@@ -411,7 +417,7 @@ func (r *CtrlPipe) DisableSessions(ctx context.Context, cluster entity.Cluster, 
 		"--infobase", infobase.ID,
 		"--denied-from", now.Format(formatDate),
 		"--denied-message", "БАЗА ЗАКРЫТА НА СОЗДАНИЕ РЕЗЕРВНОЙ КОПИИ",
-		"--denied-to", now.Add(60 * time.Minute).Format(formatDate),
+		"--denied-to", now.Add(defaultBlockTime * time.Minute).Format(formatDate),
 		"--permission-code", code,
 		"--scheduled-jobs-deny", "on",
 		"--sessions-deny", "on"}
@@ -455,20 +461,16 @@ func (r *CtrlPipe) DisableSessions(ctx context.Context, cluster entity.Cluster, 
 		quit <- struct{}{}
 	}()
 
-	err = nil
+	var errg error
 
 	for {
 		select {
-		case err = <-errs:
+		case errg = <-errs:
 			cmd.Cancel()
 		case <-quit:
 			wg.Wait()
 
-			if err != nil {
-				return err
-			}
-
-			return err
+			return errg
 		}
 	}
 }
@@ -524,20 +526,16 @@ func (r *CtrlPipe) EnableSessions(ctx context.Context, cluster entity.Cluster, i
 		quit <- struct{}{}
 	}()
 
-	err = nil
+	var errg error
 
 	for {
 		select {
-		case err = <-errs:
+		case errg = <-errs:
 			cmd.Cancel()
 		case <-quit:
 			wg.Wait()
 
-			if err != nil {
-				return err
-			}
-
-			return err
+			return errg
 		}
 	}
 }
@@ -586,20 +584,16 @@ func (r *CtrlPipe) DeleteSession(ctx context.Context, cluster entity.Cluster, se
 		quit <- struct{}{}
 	}()
 
-	err = nil
+	var errg error
 
 	for {
 		select {
-		case err = <-errs:
+		case errg = <-errs:
 			cmd.Cancel()
 		case <-quit:
 			wg.Wait()
 
-			if err != nil {
-				return err
-			}
-
-			return err
+			return errg
 		}
 	}
 }
@@ -712,7 +706,7 @@ func (r *CtrlPipe) GetConnections(ctx context.Context, cluster entity.Cluster, i
 		}
 	}()
 
-	err = nil
+	var errg error
 
 	rv := make([]entity.Connection, 0, initialSize)
 
@@ -723,16 +717,16 @@ func (r *CtrlPipe) GetConnections(ctx context.Context, cluster entity.Cluster, i
 		case data := <-datas:
 			rv = append(rv, data)
 			num++
-		case err = <-errs:
+		case errg = <-errs:
 			cmd.Cancel()
 		case <-quit:
 			wg.Wait()
 
-			if err != nil {
-				return nil, err
+			if errg != nil {
+				return nil, errg
 			}
 
-			return rv[:num:num], err
+			return rv[:num:num], errg
 		}
 	}
 }
@@ -781,20 +775,16 @@ func (r *CtrlPipe) DeleteConnection(ctx context.Context, cluster entity.Cluster,
 		quit <- struct{}{}
 	}()
 
-	err = nil
+	var errg error
 
 	for {
 		select {
-		case err = <-errs:
+		case errg = <-errs:
 			cmd.Cancel()
 		case <-quit:
 			wg.Wait()
 
-			if err != nil {
-				return err
-			}
-
-			return err
+			return errg
 		}
 	}
 }

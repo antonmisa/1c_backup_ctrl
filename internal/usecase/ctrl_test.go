@@ -1,3 +1,4 @@
+// nolint
 package usecase_test
 
 import (

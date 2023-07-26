@@ -1,3 +1,4 @@
+// nolint
 package pipe
 
 import (
@@ -32,7 +33,11 @@ func TestPipe_New(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got, err := New(tt.path)
 			if (err != nil) && !errors.Is(err, tt.wantErr) {
 				t.Errorf("Pipe.New() error = %v, wantErr %v", err, tt.wantErr)
@@ -82,7 +87,11 @@ func TestPipe_Run(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			got1, got2, err := tt.p.Run(tt.args.ctx, tt.args.arg...)
 			if (err != nil) && !errors.Is(err, tt.wantErr) {
 				t.Errorf("Pipe.Run() error = %v, wantErr %v", err, tt.wantErr)
