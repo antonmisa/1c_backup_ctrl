@@ -1,6 +1,0 @@
-app:
-    path_to_rac: ""
-    path_to_1cs: ""
-    lock_code: "12345"
-logger:
-    level: debug
