@@ -24,3 +24,6 @@ vendor/
 
 # backup dir
 backup/
+
+# build dir
+build/
