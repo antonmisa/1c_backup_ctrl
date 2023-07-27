@@ -11,6 +11,7 @@ import (
 	"github.com/antonmisa/1cctl_cli/internal/entity"
 	uc "github.com/antonmisa/1cctl_cli/internal/usecase"
 	"github.com/antonmisa/1cctl_cli/pkg/pipe"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -599,17 +600,18 @@ func (r *CtrlPipe) DeleteSession(ctx context.Context, cluster entity.Cluster, se
 }
 
 func (r *CtrlPipe) DeleteSessions(ctx context.Context, cluster entity.Cluster, sessions []entity.Session, clusterCred entity.Credentials) error {
-	// TODO: concurent run
-	var errs error
+	g, ctx := errgroup.WithContext(ctx)
 
 	for i := range sessions {
-		err := r.DeleteSession(ctx, cluster, sessions[i], clusterCred)
-		if err != nil {
-			errs = fmt.Errorf("%w - %w", errs, err)
-		}
+		i := i
+
+		g.Go(func() error {
+			return r.DeleteSession(ctx, cluster, sessions[i], clusterCred)
+		})
 	}
 
-	return errs
+	err := g.Wait()
+	return err
 }
 
 func (r *CtrlPipe) GetConnections(ctx context.Context, cluster entity.Cluster, infobase entity.Infobase, clusterCred entity.Credentials) ([]entity.Connection, error) {
@@ -790,15 +792,16 @@ func (r *CtrlPipe) DeleteConnection(ctx context.Context, cluster entity.Cluster,
 }
 
 func (r *CtrlPipe) DeleteConnections(ctx context.Context, cluster entity.Cluster, connections []entity.Connection, clusterCred entity.Credentials) error {
-	// TODO: concurent run
-	var errs error
+	g, ctx := errgroup.WithContext(ctx)
 
 	for i := range connections {
-		err := r.DeleteConnection(ctx, cluster, connections[i], clusterCred)
-		if err != nil {
-			errs = fmt.Errorf("%w - %w", errs, err)
-		}
+		i := i
+
+		g.Go(func() error {
+			return r.DeleteConnection(ctx, cluster, connections[i], clusterCred)
+		})
 	}
 
-	return errs
+	err := g.Wait()
+	return err
 }
