@@ -5,3 +5,4 @@ app:
 
 logger:
   level: "debug"  
+  path: "log.log"

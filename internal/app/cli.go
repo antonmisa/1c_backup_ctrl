@@ -25,7 +25,10 @@ var (
 
 func Run(cfg *config.Config, clusterConnection, clusterName, clusterAdmin, clusterPwd, infobase, infobaseUser, infobasePwd, outputPath string) {
 
-	l := logger.New(cfg.Log.Level)
+	l, err := logger.New(cfg.Log.Path, cfg.Log.Level)
+	if err != nil {
+		l.Fatal(fmt.Errorf("app - RunCLI - logger.New: %w", err))
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 

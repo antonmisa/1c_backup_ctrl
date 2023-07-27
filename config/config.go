@@ -25,6 +25,7 @@ type App struct {
 // Log -.
 type Log struct {
 	Level string `env-required:"true" yaml:"level" env:"LOG_LEVEL"`
+	Path  string `env-required:"true" yaml:"path"`
 }
 
 func New() (*Config, error) {
@@ -66,6 +67,7 @@ func Prepare() error {
 		},
 		Log{
 			Level: "debug",
+			Path:  "log.log",
 		},
 	}
 

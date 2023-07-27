@@ -25,7 +25,7 @@ type Logger struct {
 var _ Interface = (*Logger)(nil)
 
 // New -.
-func New(level string) *Logger {
+func New(path string, level string) (*Logger, error) {
 	var l zerolog.Level
 
 	switch strings.ToLower(level) {
@@ -43,12 +43,22 @@ func New(level string) *Logger {
 
 	zerolog.SetGlobalLevel(l)
 
+	runLogFile, err := os.OpenFile(
+		path,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+		0664,
+	)
+	if err != nil {
+		return nil, err
+	}
+	multi := zerolog.MultiLevelWriter(os.Stdout, runLogFile)
+
 	skipFrameCount := 3
-	logger := zerolog.New(os.Stdout).With().Timestamp().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + skipFrameCount).Logger()
+	logger := zerolog.New(multi).With().Timestamp().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + skipFrameCount).Logger()
 
 	return &Logger{
 		logger: &logger,
-	}
+	}, nil
 }
 
 // Debug -.
