@@ -9,6 +9,10 @@ import (
 )
 
 func main() {
+	var prepare bool
+
+	flag.BoolVar(&prepare, "prepare", false, "creating default environment and config")
+
 	var clusterConnection string
 
 	flag.StringVar(&clusterConnection, "clusterConnection", "localhost:1545", "cluster host:port to connect in cli mode")
@@ -42,6 +46,14 @@ func main() {
 	flag.StringVar(&outputPath, "output", "", "directory backup move to")
 
 	flag.Parse()
+
+	// Just prepare env, config and exit
+	if prepare {
+		err := config.Prepare()
+		if err != nil {
+			log.Fatalf("Prepare error: %s", err)
+		}
+	}
 
 	// Configuration
 	cfg, err := config.New()

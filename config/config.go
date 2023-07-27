@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ilyakaznacheev/cleanenv"
+	"gopkg.in/yaml.v3"
 )
 
 // Config -.
@@ -45,4 +46,38 @@ func New() (*Config, error) {
 	}
 
 	return cfg, nil
+}
+
+func Prepare() error {
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "./config.yml"
+	}
+
+	if _, err := os.Stat(configPath); err == nil {
+		return os.ErrExist
+	}
+
+	cfg := &Config{
+		App{
+			PathToRAC: "path to rac file",
+			PathTo1C:  "path to 1c executable client",
+			LockCode:  "12345",
+		},
+		Log{
+			Level: "debug",
+		},
+	}
+
+	yamlData, err := yaml.Marshal(&cfg)
+	if err != nil {
+		return fmt.Errorf("error while marshaling config: %w", err)
+	}
+
+	err = os.WriteFile(configPath, yamlData, 0644)
+	if err != nil {
+		return fmt.Errorf("error while creating config.yml: %w", err)
+	}
+
+	return nil
 }
