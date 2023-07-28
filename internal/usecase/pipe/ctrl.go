@@ -19,6 +19,8 @@ const (
 
 	defaultBlockTime time.Duration = 60
 
+	initialBlockLimitSize int = 50
+
 	formatDate string = "01-02-2006 15:04:05"
 
 	keyInfobase   string = "infobase"
@@ -602,6 +604,8 @@ func (r *CtrlPipe) DeleteSession(ctx context.Context, cluster entity.Cluster, se
 func (r *CtrlPipe) DeleteSessions(ctx context.Context, cluster entity.Cluster, sessions []entity.Session, clusterCred entity.Credentials) error {
 	g, ctx := errgroup.WithContext(ctx)
 
+	g.SetLimit(initialBlockLimitSize)
+
 	for i := range sessions {
 		i := i
 
@@ -793,6 +797,8 @@ func (r *CtrlPipe) DeleteConnection(ctx context.Context, cluster entity.Cluster,
 
 func (r *CtrlPipe) DeleteConnections(ctx context.Context, cluster entity.Cluster, connections []entity.Connection, clusterCred entity.Credentials) error {
 	g, ctx := errgroup.WithContext(ctx)
+
+	g.SetLimit(initialBlockLimitSize)
 
 	for i := range connections {
 		i := i
