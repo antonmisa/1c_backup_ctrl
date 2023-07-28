@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 
 	"github.com/antonmisa/1cctl_cli/config"
 	"github.com/antonmisa/1cctl_cli/internal/app"
@@ -53,6 +54,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Prepare error: %s", err)
 		}
+		os.Exit(0)
 	}
 
 	// Configuration
