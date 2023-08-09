@@ -25,16 +25,9 @@ const (
 	initialBlockLimitSize int = 50
 
 	formatDate string = "01-02-2006 15:04:05"
-
-	keyInfobase   string = "infobase"
-	keyConnection string = "connection"
-	keyProcess    string = "process"
-	keyHost       string = "host"
-	keyName       string = "name"
 )
 
 var (
-	ErrNotFound          = errors.New("key not found")
 	ErrInfobaseIsEmpty   = errors.New("infobase is empty")
 	ErrSessionIsEmpty    = errors.New("session is empty")
 	ErrConnectionIsEmpty = errors.New("connection is empty")
