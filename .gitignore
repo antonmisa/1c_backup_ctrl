@@ -24,7 +24,7 @@ bin/
 vendor/
 
 # backup dir
-backup/
+./backup/
 
 # build dir
 build/
